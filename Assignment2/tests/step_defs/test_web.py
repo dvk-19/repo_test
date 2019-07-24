@@ -1,44 +1,58 @@
 import _pytest.fixtures
-import pytest_bdd
 from pytest_bdd import given, parsers, when, then, scenario
 from selenium import webdriver
-import selenium.webdriver.common.keys
 from webdriver_manager.chrome import ChromeDriverManager
+import page
+import logging
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 
+
+google_page = 'https://google.co.in'
 file_path = '../features/web.feature'
-
+# better not to hardcode the path,
+# instead can be fetched using os.path
 
 @_pytest.fixtures.fixture()
-def browser():
-    print('Initiating Chrome browser')
-    browser_obj = webdriver.Chrome(ChromeDriverManager().install())
-    return browser_obj
+def driver():
+    browser = webdriver.Chrome(ChromeDriverManager().install())
+    return browser
+
+@scenario(file_path,'When I search google, to download firefox')
+def test_searchresults():
+
+    """Search the phrase 'Firefox' and the results displayed are for Firefox """
+
+@given('Google Search Engine')
+def search_Firefox(driver):
+    driver.get(google_page)
+
+@when(parsers.parse('I enter {phrase}'))
+def search(driver, phrase):
+    page.set_search(driver, phrase)
+    page.click_link(driver)
+    page.click_download(driver)
 
 
-@scenario(file_path, 'Basic Google Search')
-def test_search():
-    """Basic google search"""
+@then("Results for Firefox are found")
+def select_dropdown(driver):
+    driver.find_element(By.ID, "select_desktop_release_language").click()
+    dropdown = Select(driver.find_element(By.ID, "select_desktop_release_language"))
+    print (str(len(dropdown.options)))
+
+    for i in dropdown:
+        print(i.text)
+
+def tearDown(driver):
+    driver.close()
 
 
 
-@given('The Google Search Page is displayed')
-def getsearchpage(browser):
-    browser.get('https://www.google.co.in/')
 
 
-@when(parsers.parse('The user searches for {phrase}'))
-def searchFirefox(browser, phrase):
-    browser.find_element_by_name('q').send_keys(phrase)
-    browser.find_element_by_name('q').send_keys(selenium.webdriver.common.keys.Keys.RETURN)
 
 
-@then(parsers.parse('the results are shown for {phrase}'))
-def resultsFirefox(browser):
-    xpath = '//*[@id="rso"]/div[1]/div/div/div/div[1]/a'
-    browser.find_element_by_xpath(xpath).click()
-    assert isinstance (browser.title,str)
-    assert "https://www.mozilla.org" in browser.current_url
 
 
-def tearDown(browser):
-    browser.close()
+
+

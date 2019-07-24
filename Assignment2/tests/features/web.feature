@@ -1,8 +1,8 @@
-﻿@web @google
+@web @google
 
-Feature: Mozilla Download in another language
+  Feature: I want to download firefox
 
-    Scenario: Basic Google Search
-         Given The Google Search Page is displayed
-         When The user searches for Firefox
-         Then the results are shown for Firefox
+    Scenario: When I search google, to download firefox
+      Given Google Search Engine
+      When I enter Firefox
+      Then Results for Firefox are found
